@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>I Love You — Cat Pounce</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root{
+    --ink:#161616;
+    --paper:#eef0ee;
+    --love:#2b4865;
+    --pink:#ff6f91;
+    --shadow: rgba(20,20,20,0.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    height:100%;
+    margin:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: radial-gradient(circle at 30% 20%, #fff 0%, #dfe3df 60%, #cdd2cd 100%);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .card{
+    position:relative;
+    width:min(92vw, 420px);
+    background: var(--paper);
+    border-radius: 28px;
+    box-shadow: 0 30px 60px var(--shadow), 0 2px 0 rgba(255,255,255,0.6) inset;
+    overflow:hidden;
+  }
+  .stage{
+    position:relative;
+    height: 280px;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    padding: 0 18px 28px;
+  }
+  .cat-wrap{
+    position:absolute;
+    left: 14%;
+    bottom: 34px;
+    width: 180px;
+    transform-origin: 50% 100%;
+  }
+  .love-text{
+    position:absolute;
+    right: 14%;
+    bottom: 92px;
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--love);
+    letter-spacing: 0.5px;
+    transform-origin: 50% 100%;
+    user-select:none;
+  }
+  .ground{
+    position:absolute;
+    left:0; right:0; bottom: 26px;
+    height:2px;
+    background: rgba(20,20,20,0.08);
+  }
+  .hint{
+    position:absolute;
+    top: 14px; left: 0; right:0;
+    text-align:center;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(22,22,22,0.35);
+  }
+  .result{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap: 6px;
+    opacity:0;
+    pointer-events:none;
+    background: var(--paper);
+  }
+  .result h2{
+    margin:0;
+    font-size: 32px;
+    color: var(--love);
+    font-weight: 800;
+  }
+  .result p{
+    margin: 0 0 14px;
+    color: rgba(22,22,22,0.45);
+    font-size: 14px;
+  }
+  .gif-wrap{
+    position:relative;
+    width: 100px;
+    margin-bottom: 4px;
+  }
+  .mini-cat{
+    width:100%;
+    display:block;
+    transform-origin: 50% 100%;
+    animation: catBob 1.6s ease-in-out infinite;
+  }
+  @keyframes catBob{
+    0%,100%{ transform: translateY(0) scaleX(1) scaleY(1); }
+    50%{ transform: translateY(-7px) scaleX(1.03) scaleY(0.97); }
+  }
+  .mini-tail{
+    transform-origin: 90% 90%;
+    animation: tailWag 1.1s ease-in-out infinite;
+  }
+  @keyframes tailWag{
+    0%,100%{ transform: rotate(0deg); }
+    50%{ transform: rotate(10deg); }
+  }
+  .mini-eye{
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: miniBlink 2.6s ease-in-out infinite;
+  }
+  @keyframes miniBlink{
+    0%, 40%, 60%, 100%{ transform: scaleY(1); }
+    48%, 52%{ transform: scaleY(0.15); }
+  }
+  .fly-heart{
+    position:absolute;
+    font-size: 13px;
+    color: var(--pink);
+    opacity:0;
+    animation: floatHeart 2.4s ease-in infinite;
+  }
+  .fly-heart.h1{ left:-8px; top:32%; animation-delay:0s; }
+  .fly-heart.h2{ left:48%; top:6%; animation-delay:0.8s; }
+  .fly-heart.h3{ left:94%; top:34%; animation-delay:1.6s; }
+  @keyframes floatHeart{
+    0%{ opacity:0; transform: translateY(0) scale(0.6); }
+    15%{ opacity:1; }
+    80%{ opacity:1; }
+    100%{ opacity:0; transform: translateY(-46px) scale(1.1); }
+  }
+  button#replay{
+    border: none;
+    background: white;
+    color: var(--ink);
+    font-weight: 700;
+    font-size: 14px;
+    padding: 10px 26px;
+    border-radius: 999px;
+    box-shadow: 0 8px 18px var(--shadow);
+    cursor:pointer;
+    transition: transform .15s ease;
+  }
+  button#replay:hover{ transform: translateY(-2px); }
+  button#replay:active{ transform: translateY(0px) scale(0.97); }
+  .heart{
+    position:absolute;
+    bottom: 40%;
+    font-size: 16px;
+    opacity:0;
+    color: var(--pink);
+  }
+  .credit{
+    text-align:center;
+    font-size: 11px;
+    color: rgba(22,22,22,0.3);
+    padding: 10px 0 16px;
+    letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+
+<div class="card" id="card">
+  <div class="stage" id="stage">
+    <div class="hint">tap the cat</div>
+    <div class="ground"></div>
+
+    <div class="love-text" id="loveText">I Love You</div>
+
+    <div class="cat-wrap" id="catWrap">
+      <svg viewBox="0 0 220 150" width="100%">
+        <g id="tail">
+          <path d="M 32 96 C 2 92, -6 56, 16 42" fill="none" stroke="#161616" stroke-width="15" stroke-linecap="round"/>
+        </g>
+        <g id="backlegs">
+          <ellipse cx="52" cy="128" rx="13" ry="9" fill="#161616"/>
+        </g>
+        <ellipse id="backcircle" cx="68" cy="96" rx="42" ry="35" fill="#161616"/>
+        <ellipse id="bodybetween" cx="98" cy="102" rx="28" ry="30" fill="#161616"/>
+        <ellipse id="frontcircle" cx="122" cy="102" rx="30" ry="27" fill="#161616"/>
+        <g id="frontlegs">
+          <ellipse cx="124" cy="130" rx="11" ry="9" fill="#161616"/>
+        </g>
+
+        <g id="head">
+          <g id="ears">
+            <path d="M126 46 L136 18 L153 42 Z" fill="#161616"/>
+            <path d="M149 42 L166 18 L176 46 Z" fill="#161616"/>
+          </g>
+          <circle cx="151" cy="70" r="34" fill="#161616"/>
+          <g id="eyes">
+            <ellipse cx="141" cy="69" rx="5" ry="7.5" fill="#eef0ee"/>
+            <ellipse cx="162" cy="67" rx="5" ry="7.5" fill="#eef0ee"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <div class="result" id="result">
+    <div class="gif-wrap">
+      <span class="fly-heart h1">❤</span>
+      <span class="fly-heart h2">❤</span>
+      <span class="fly-heart h3">❤</span>
+      <svg class="mini-cat" viewBox="0 0 220 150">
+        <path class="mini-tail" d="M 32 96 C 2 92, -6 56, 16 42" fill="none" stroke="#161616" stroke-width="15" stroke-linecap="round"/>
+        <ellipse cx="52" cy="128" rx="13" ry="9" fill="#161616"/>
+        <ellipse cx="68" cy="96" rx="42" ry="35" fill="#161616"/>
+        <ellipse cx="98" cy="102" rx="28" ry="30" fill="#161616"/>
+        <ellipse cx="122" cy="102" rx="30" ry="27" fill="#161616"/>
+        <ellipse cx="124" cy="130" rx="11" ry="9" fill="#161616"/>
+        <path d="M126 46 L136 18 L153 42 Z" fill="#161616"/>
+        <path d="M149 42 L166 18 L176 46 Z" fill="#161616"/>
+        <circle cx="151" cy="70" r="34" fill="#161616"/>
+        <ellipse class="mini-eye" cx="141" cy="69" rx="5" ry="7.5" fill="#eef0ee"/>
+        <ellipse class="mini-eye" cx="162" cy="67" rx="5" ry="7.5" fill="#eef0ee"/>
+      </svg>
+    </div>
+    <h2>I Love You</h2>
+    <p>the cat agrees</p>
+    <button id="replay">Play Again</button>
+  </div>
+</div>
+
+<script>
+const catWrap = document.getElementById("catWrap");
+const loveText = document.getElementById("loveText");
+const stage = document.getElementById("stage");
+const result = document.getElementById("result");
+const card = document.getElementById("card");
+const tail = document.getElementById("tail");
+
+let idleSway = null;
+
+function startIdle(){
+  idleSway = gsap.to(tail, {
+    rotation: 6,
+    transformOrigin: "90% 90%",
+    duration: 0.9,
+    yoyo: true,
+    repeat: -1,
+    ease: "sine.inOut"
+  });
+  gsap.to(catWrap, {
+    y: -4,
+    duration: 1.1,
+    yoyo: true,
+    repeat: -1,
+    ease: "sine.inOut"
+  });
+}
+
+function resetScene(){
+  gsap.set(catWrap, { x:0, y:0, rotation:0, scaleX:1, scaleY:1, opacity:1 });
+  gsap.set(loveText, { x:0, y:0, rotation:0, opacity:1, scale:1 });
+  gsap.set(result, { opacity:0, pointerEvents:"none", scale:0.9 });
+  gsap.killTweensOf([catWrap, tail]);
+  startIdle();
+}
+
+function pounce(){
+  gsap.killTweensOf([catWrap, tail]);
+  if(idleSway) idleSway.kill();
+
+  const tl = gsap.timeline();
+
+  tl.to(catWrap, { scaleX: 1.12, scaleY: 0.82, duration: 0.14, ease: "power1.out" })
+    .to(catWrap, {
+        x: 90, y: -46, rotation: 10, scaleX: 0.92, scaleY: 1.12,
+        duration: 0.32, ease: "power2.out"
+      })
+    .to(catWrap, {
+        x: 128, y: -2, rotation: 4, scaleX: 1.06, scaleY: 0.94,
+        duration: 0.22, ease: "power3.in"
+      })
+    .to(loveText, {
+        rotation: 28, x: 26, y: 26, duration: 0.18, ease: "power1.out"
+      }, "<")
+    .to(catWrap, { scaleX: 0.97, scaleY: 1.05, duration: 0.1 })
+    .to(catWrap, { scaleX: 1, scaleY: 1, duration: 0.12 })
+    .to(loveText, {
+        x: 70, y: 120, rotation: 70, opacity: 0, duration: 0.4, ease: "power2.in"
+      }, "-=0.05")
+    .to(catWrap, { y: -16, duration: 0.16, ease: "power1.out" })
+    .to(catWrap, { y: 0, duration: 0.18, ease: "bounce.out" })
+    .to([catWrap, stage], { opacity: 0, duration: 0.35, ease: "power1.inOut" }, "+=0.25")
+    .to(result, { opacity: 1, scale: 1, pointerEvents: "auto", duration: 0.45, ease: "back.out(1.6)" }, "-=0.1");
+}
+
+document.getElementById("replay").addEventListener("click", () => {
+  gsap.to(result, { opacity: 0, scale: 0.9, pointerEvents: "none", duration: 0.25, onComplete: () => {
+    gsap.set(stage, { opacity: 1 });
+    resetScene();
+  }});
+});
+
+catWrap.addEventListener("click", pounce);
+
+resetScene();
+setTimeout(pounce, 1200);
+</script>
+
+</body>
+</html>
